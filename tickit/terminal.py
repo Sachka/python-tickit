@@ -2,12 +2,8 @@
 import ctypes
 import io
 import os
-import sys
 
-try:
-    from collections.abc import Sequence
-except ImportError:
-    from collections import Sequence
+from collections.abc import Sequence
 
 import tickit.pen as pen
 import tickit.event as event
@@ -274,7 +270,7 @@ class Term:
         """Number of columns in the terminal."""
         return self.get_size()[1]
 
-    def print_(self, text):
+    def print(self, text):
         """Print the given string to the terminal.
 
         This method takes a bytes or, with UTF-8 enabled, str object and prints
@@ -289,9 +285,6 @@ class Term:
                 tickit.tickit_term_print(self._term, text.encode('UTF-8'))
             else:
                 raise TypeError('Unicode output disabled')
-
-    if sys.version_info.major >= 3:
-        print = print_
 
     def goto(self, lines, cols):
         """Move the cursor to the absolute coordinates specified."""
