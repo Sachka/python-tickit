@@ -5,6 +5,7 @@ h1. Installation
 
 * "tickit":http://home.leonerd.org.uk/code/libtickit/ via "bzr":http://bazaar.leonerd.org.uk/c/libtickit/, revision 154 or newer.
 * "Python 3.2":http://www.python.org or higher.
+* "enum34":https://pypi.python.org/pypi/enum34 if not using Python 3.4+
 
 h1. Usage
 
