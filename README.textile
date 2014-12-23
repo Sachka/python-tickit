@@ -3,7 +3,7 @@ h1. Installation
 
 @python-tickit@ requires the following:
 
-* "tickit":http://home.leonerd.org.uk/code/libtickit/ via "bzr":http://bazaar.leonerd.org.uk/c/libtickit/, revision 154 or newer.
+* "tickit":http://home.leonerd.org.uk/code/libtickit/ via "bzr":http://bazaar.leonerd.org.uk/c/libtickit/, revision 284 or newer.
 * "Python 3.2":http://www.python.org or higher.
 * "enum34":https://pypi.python.org/pypi/enum34 if not using Python 3.4+
 
