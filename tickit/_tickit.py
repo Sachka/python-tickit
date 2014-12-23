@@ -1,6 +1,7 @@
 
 from ctypes import *
 from enum import IntEnum
+from functools import wraps
 
 c_string = c_char_p
 
@@ -27,16 +28,16 @@ def mkfunc(prefix, first=None):
     @wraps(function)
     def func(name, restype, *argtypes):
         if first is not None:
+            argtypes = list(argtypes)
             argtypes.insert(0, first)
 
         name = '_'.join([prefix, name])
-
         function(name, restype, *argtypes)
 
-    return function
+    return func
 
 class CEnum(IntEnum):
-    @clasmethod
+    @classmethod
     def from_param(cls, self):
         if not isinstance(self, cls):
             raise TypeError('invalid enum')
@@ -107,7 +108,7 @@ Pen_p = POINTER(pen)
 
 _fpen = mkfunc('pen', Pen_p)
 
-function('pen_new', Pen_p, None)
+function('pen_new', Pen_p)
 _fpen('clone', Pen_p)
 _fpen('destroy', None)
 
@@ -169,7 +170,7 @@ class rectset(Structure): pass
 RectSet_p = POINTER(rectset)
 
 _frectset = mkfunc('rectset', RectSet_p)
-function('rectset_new', RectSet_p, None)
+function('rectset_new', RectSet_p)
 _frectset('destroy', None)
 _frectset('clear',   None)
 
@@ -189,7 +190,7 @@ Term_p = POINTER(term)
 TermOutputFunc = CFUNCTYPE(None, Term_p, c_string, c_size_t, c_void_p)
 
 _fterm = mkfunc('term', Term_p)
-function('term_new', Term_p, None)
+function('term_new', Term_p)
 function('term_new_for_termtype', Term_p, c_string)
 _fterm('destroy', None)
 _fterm('get_termtype', c_string)
@@ -350,7 +351,7 @@ _frenderbuffer('get_cell_text', c_size_t, c_int, c_int, c_string, c_size_t)
 _frenderbuffer('get_cell_linemask', LineMask, c_int, c_int)
 _frenderbuffer('get_cell_pen', Pen_p, c_int, c_int)
 
-class SpanInfo(CEnum):
+class SpanInfo(Structure):
     _fields_ = [
         ('is_active', c_bool),
         ('n_columns', c_int),
