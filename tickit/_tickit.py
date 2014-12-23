@@ -1,639 +1,362 @@
+
 from ctypes import *
+from enum import IntEnum
 
-STRING = c_char_p
-_libraries = {}
-_libraries['libtickit.so'] = CDLL('libtickit.so')
+c_string = c_char_p
 
+_lib = CDLL('libtickit.so')
+_base = 'tickit'
 
-TICKIT_LINECAP_END = 2
-TICKIT_MOD_SHIFT = 1
-TICKIT_MOUSEWHEEL_DOWN = 2
-TICKIT_MOUSEWHEEL_UP = 1
-TICKIT_MOUSEEV_WHEEL = 4
-TICKIT_MOUSEEV_DRAG = 2
-TICKIT_TERMCTL_CURSORBLINK = 4
-TICKIT_MOD_ALT = 2
-TICKIT_PENTYPE_INT = 1
-TICKIT_TERM_MOUSEMODE_OFF = 0
-TICKIT_PENTYPE_BOOL = 0
-TICKIT_MOUSEEV_PRESS = 1
-TICKIT_TERMCTL_ALTSCREEN = 1
-TICKIT_PENTYPE_COLOUR = 2
-TICKIT_EV_UNBIND = -2147483648
-TICKIT_EV_CHANGE = 8
-TICKIT_EV_MOUSE = 4
-TICKIT_LINECAP_START = 1
-TICKIT_EV_KEY = 2
-TICKIT_EV_RESIZE = 1
-TICKIT_TERM_MOUSEMODE_MOVE = 3
-TICKIT_KEYEV_KEY = 1
-TICKIT_PEN_ALTFONT = 7
-TICKIT_TERMCTL_COLORS = 10
-TICKIT_TERMCTL_KEYPAD_APP = 9
-TICKIT_LINE_THICK = 3
-TICKIT_TERMCTL_TITLE_TEXT = 7
-TICKIT_TERMCTL_ICON_TEXT = 6
-TICKIT_TERMCTL_CURSORSHAPE = 5
-TICKIT_TERMCTL_MOUSE = 3
-TICKIT_LINECAP_BOTH = 3
-TICKIT_LINE_DOUBLE = 2
-TICKIT_LINE_SINGLE = 1
-TICKIT_TERM_CURSORSHAPE_LEFT_BAR = 3
-TICKIT_TERMCTL_ICONTITLE_TEXT = 8
-TICKIT_KEYEV_TEXT = 2
-TICKIT_TERM_CURSORSHAPE_UNDER = 2
-TICKIT_TERMCTL_CURSORVIS = 2
-TICKIT_PEN_FG = 0
-TICKIT_TERM_CURSORSHAPE_BLOCK = 1
-TICKIT_N_PEN_ATTRS = 8
-TICKIT_MOUSEEV_RELEASE = 3
-TICKIT_PEN_STRIKE = 6
-TICKIT_PEN_REVERSE = 5
-TICKIT_PEN_ITALIC = 4
-TICKIT_PEN_UNDER = 3
-TICKIT_PEN_BOLD = 2
-TICKIT_PEN_BG = 1
-TICKIT_TERM_MOUSEMODE_DRAG = 2
-TICKIT_TERM_MOUSEMODE_CLICK = 1
-TICKIT_MOD_CTRL = 4
+__all__ = []
 
-# values for enumeration 'TickitEventType'
-TickitEventType = c_int # enum
+def function(name, restype, *argtypes):
+    pkg_name = name
+    name = '_'.join([_base, name])
+    ret = getattr(_lib, name, None)
 
-# values for enumeration 'TickitKeyEventType'
-TickitKeyEventType = c_int # enum
+    if ret is None:
+        raise KeyError('no such C function')
 
-# values for enumeration 'TickitMouseEventType'
-TickitMouseEventType = c_int # enum
-class TickitEvent(Structure):
-    pass
-TickitEvent._fields_ = [
-    ('lines', c_int),
-    ('cols', c_int),
-    ('type', c_int),
-    ('str', STRING),
-    ('button', c_int),
-    ('line', c_int),
-    ('col', c_int),
-    ('mod', c_int),
-]
-class TickitPen(Structure):
-    pass
-TickitPen._fields_ = [
-]
+    ret.argtypes = argtypes
+    ret.restype = restype
 
-# values for enumeration 'TickitPenAttr'
-TickitPenAttr = c_int # enum
+    globals()[pkg_name] = ret
+    __all__.append(pkg_name)
 
-# values for enumeration 'TickitPenAttrType'
-TickitPenAttrType = c_int # enum
-tickit_pen_new = _libraries['libtickit.so'].tickit_pen_new
-tickit_pen_new.restype = POINTER(TickitPen)
-tickit_pen_new.argtypes = []
-tickit_pen_new_attrs = _libraries['libtickit.so'].tickit_pen_new_attrs
-tickit_pen_new_attrs.restype = POINTER(TickitPen)
-tickit_pen_new_attrs.argtypes = [TickitPenAttr]
-tickit_pen_clone = _libraries['libtickit.so'].tickit_pen_clone
-tickit_pen_clone.restype = POINTER(TickitPen)
-tickit_pen_clone.argtypes = [POINTER(TickitPen)]
-tickit_pen_destroy = _libraries['libtickit.so'].tickit_pen_destroy
-tickit_pen_destroy.restype = None
-tickit_pen_destroy.argtypes = [POINTER(TickitPen)]
-tickit_pen_has_attr = _libraries['libtickit.so'].tickit_pen_has_attr
-tickit_pen_has_attr.restype = c_int
-tickit_pen_has_attr.argtypes = [POINTER(TickitPen), TickitPenAttr]
-tickit_pen_is_nonempty = _libraries['libtickit.so'].tickit_pen_is_nonempty
-tickit_pen_is_nonempty.restype = c_int
-tickit_pen_is_nonempty.argtypes = [POINTER(TickitPen)]
-tickit_pen_nondefault_attr = _libraries['libtickit.so'].tickit_pen_nondefault_attr
-tickit_pen_nondefault_attr.restype = c_int
-tickit_pen_nondefault_attr.argtypes = [POINTER(TickitPen), TickitPenAttr]
-tickit_pen_is_nondefault = _libraries['libtickit.so'].tickit_pen_is_nondefault
-tickit_pen_is_nondefault.restype = c_int
-tickit_pen_is_nondefault.argtypes = [POINTER(TickitPen)]
-tickit_pen_get_bool_attr = _libraries['libtickit.so'].tickit_pen_get_bool_attr
-tickit_pen_get_bool_attr.restype = c_int
-tickit_pen_get_bool_attr.argtypes = [POINTER(TickitPen), TickitPenAttr]
-tickit_pen_set_bool_attr = _libraries['libtickit.so'].tickit_pen_set_bool_attr
-tickit_pen_set_bool_attr.restype = None
-tickit_pen_set_bool_attr.argtypes = [POINTER(TickitPen), TickitPenAttr, c_int]
-tickit_pen_get_int_attr = _libraries['libtickit.so'].tickit_pen_get_int_attr
-tickit_pen_get_int_attr.restype = c_int
-tickit_pen_get_int_attr.argtypes = [POINTER(TickitPen), TickitPenAttr]
-tickit_pen_set_int_attr = _libraries['libtickit.so'].tickit_pen_set_int_attr
-tickit_pen_set_int_attr.restype = None
-tickit_pen_set_int_attr.argtypes = [POINTER(TickitPen), TickitPenAttr, c_int]
-tickit_pen_get_colour_attr = _libraries['libtickit.so'].tickit_pen_get_colour_attr
-tickit_pen_get_colour_attr.restype = c_int
-tickit_pen_get_colour_attr.argtypes = [POINTER(TickitPen), TickitPenAttr]
-tickit_pen_set_colour_attr = _libraries['libtickit.so'].tickit_pen_set_colour_attr
-tickit_pen_set_colour_attr.restype = None
-tickit_pen_set_colour_attr.argtypes = [POINTER(TickitPen), TickitPenAttr, c_int]
-tickit_pen_set_colour_attr_desc = _libraries['libtickit.so'].tickit_pen_set_colour_attr_desc
-tickit_pen_set_colour_attr_desc.restype = c_int
-tickit_pen_set_colour_attr_desc.argtypes = [POINTER(TickitPen), TickitPenAttr, STRING]
-tickit_pen_clear_attr = _libraries['libtickit.so'].tickit_pen_clear_attr
-tickit_pen_clear_attr.restype = None
-tickit_pen_clear_attr.argtypes = [POINTER(TickitPen), TickitPenAttr]
-tickit_pen_clear = _libraries['libtickit.so'].tickit_pen_clear
-tickit_pen_clear.restype = None
-tickit_pen_clear.argtypes = [POINTER(TickitPen)]
-tickit_pen_equiv_attr = _libraries['libtickit.so'].tickit_pen_equiv_attr
-tickit_pen_equiv_attr.restype = c_int
-tickit_pen_equiv_attr.argtypes = [POINTER(TickitPen), POINTER(TickitPen), TickitPenAttr]
-tickit_pen_equiv = _libraries['libtickit.so'].tickit_pen_equiv
-tickit_pen_equiv.restype = c_int
-tickit_pen_equiv.argtypes = [POINTER(TickitPen), POINTER(TickitPen)]
-tickit_pen_copy_attr = _libraries['libtickit.so'].tickit_pen_copy_attr
-tickit_pen_copy_attr.restype = None
-tickit_pen_copy_attr.argtypes = [POINTER(TickitPen), POINTER(TickitPen), TickitPenAttr]
-tickit_pen_copy = _libraries['libtickit.so'].tickit_pen_copy
-tickit_pen_copy.restype = None
-tickit_pen_copy.argtypes = [POINTER(TickitPen), POINTER(TickitPen), c_int]
-TickitPenEventFn = CFUNCTYPE(None, POINTER(TickitPen), TickitEventType, POINTER(TickitEvent), c_void_p)
-tickit_pen_bind_event = _libraries['libtickit.so'].tickit_pen_bind_event
-tickit_pen_bind_event.restype = c_int
-tickit_pen_bind_event.argtypes = [POINTER(TickitPen), TickitEventType, POINTER(TickitPenEventFn), c_void_p]
-tickit_pen_unbind_event_id = _libraries['libtickit.so'].tickit_pen_unbind_event_id
-tickit_pen_unbind_event_id.restype = None
-tickit_pen_unbind_event_id.argtypes = [POINTER(TickitPen), c_int]
-tickit_pen_attrtype = _libraries['libtickit.so'].tickit_pen_attrtype
-tickit_pen_attrtype.restype = TickitPenAttrType
-tickit_pen_attrtype.argtypes = [TickitPenAttr]
-tickit_pen_attrname = _libraries['libtickit.so'].tickit_pen_attrname
-tickit_pen_attrname.restype = STRING
-tickit_pen_attrname.argtypes = [TickitPenAttr]
-tickit_pen_lookup_attr = _libraries['libtickit.so'].tickit_pen_lookup_attr
-tickit_pen_lookup_attr.restype = TickitPenAttr
-tickit_pen_lookup_attr.argtypes = [STRING]
-class TickitRect(Structure):
-    pass
-TickitRect._fields_ = [
-    ('top', c_int),
-    ('left', c_int),
-    ('lines', c_int),
-    ('cols', c_int),
-]
-tickit_rect_init_sized = _libraries['libtickit.so'].tickit_rect_init_sized
-tickit_rect_init_sized.restype = None
-tickit_rect_init_sized.argtypes = [POINTER(TickitRect), c_int, c_int, c_int, c_int]
-tickit_rect_init_bounded = _libraries['libtickit.so'].tickit_rect_init_bounded
-tickit_rect_init_bounded.restype = None
-tickit_rect_init_bounded.argtypes = [POINTER(TickitRect), c_int, c_int, c_int, c_int]
-tickit_rect_intersect = _libraries['libtickit.so'].tickit_rect_intersect
-tickit_rect_intersect.restype = c_int
-tickit_rect_intersect.argtypes = [POINTER(TickitRect), POINTER(TickitRect), POINTER(TickitRect)]
-tickit_rect_intersects = _libraries['libtickit.so'].tickit_rect_intersects
-tickit_rect_intersects.restype = c_int
-tickit_rect_intersects.argtypes = [POINTER(TickitRect), POINTER(TickitRect)]
-tickit_rect_contains = _libraries['libtickit.so'].tickit_rect_contains
-tickit_rect_contains.restype = c_int
-tickit_rect_contains.argtypes = [POINTER(TickitRect), POINTER(TickitRect)]
-tickit_rect_add = _libraries['libtickit.so'].tickit_rect_add
-tickit_rect_add.restype = c_int
-tickit_rect_add.argtypes = [POINTER(TickitRect), POINTER(TickitRect), POINTER(TickitRect)]
-tickit_rect_subtract = _libraries['libtickit.so'].tickit_rect_subtract
-tickit_rect_subtract.restype = c_int
-tickit_rect_subtract.argtypes = [POINTER(TickitRect), POINTER(TickitRect), POINTER(TickitRect)]
-class TickitRectSet(Structure):
-    pass
-TickitRectSet._fields_ = [
-]
-tickit_rectset_new = _libraries['libtickit.so'].tickit_rectset_new
-tickit_rectset_new.restype = POINTER(TickitRectSet)
-tickit_rectset_new.argtypes = []
-tickit_rectset_destroy = _libraries['libtickit.so'].tickit_rectset_destroy
-tickit_rectset_destroy.restype = None
-tickit_rectset_destroy.argtypes = [POINTER(TickitRectSet)]
-tickit_rectset_clear = _libraries['libtickit.so'].tickit_rectset_clear
-tickit_rectset_clear.restype = None
-tickit_rectset_clear.argtypes = [POINTER(TickitRectSet)]
-size_t = c_ulong
-tickit_rectset_rects = _libraries['libtickit.so'].tickit_rectset_rects
-tickit_rectset_rects.restype = size_t
-tickit_rectset_rects.argtypes = [POINTER(TickitRectSet)]
-tickit_rectset_get_rects = _libraries['libtickit.so'].tickit_rectset_get_rects
-tickit_rectset_get_rects.restype = size_t
-tickit_rectset_get_rects.argtypes = [POINTER(TickitRectSet), POINTER(TickitRect), size_t]
-tickit_rectset_add = _libraries['libtickit.so'].tickit_rectset_add
-tickit_rectset_add.restype = None
-tickit_rectset_add.argtypes = [POINTER(TickitRectSet), POINTER(TickitRect)]
-tickit_rectset_subtract = _libraries['libtickit.so'].tickit_rectset_subtract
-tickit_rectset_subtract.restype = None
-tickit_rectset_subtract.argtypes = [POINTER(TickitRectSet), POINTER(TickitRect)]
-tickit_rectset_intersects = _libraries['libtickit.so'].tickit_rectset_intersects
-tickit_rectset_intersects.restype = c_int
-tickit_rectset_intersects.argtypes = [POINTER(TickitRectSet), POINTER(TickitRect)]
-tickit_rectset_contains = _libraries['libtickit.so'].tickit_rectset_contains
-tickit_rectset_contains.restype = c_int
-tickit_rectset_contains.argtypes = [POINTER(TickitRectSet), POINTER(TickitRect)]
-class TickitTerm(Structure):
-    pass
-TickitTerm._fields_ = [
-]
-TickitTermOutputFunc = CFUNCTYPE(None, POINTER(TickitTerm), STRING, size_t, c_void_p)
-tickit_term_new = _libraries['libtickit.so'].tickit_term_new
-tickit_term_new.restype = POINTER(TickitTerm)
-tickit_term_new.argtypes = []
-tickit_term_new_for_termtype = _libraries['libtickit.so'].tickit_term_new_for_termtype
-tickit_term_new_for_termtype.restype = POINTER(TickitTerm)
-tickit_term_new_for_termtype.argtypes = [STRING]
-tickit_term_destroy = _libraries['libtickit.so'].tickit_term_destroy
-tickit_term_destroy.restype = None
-tickit_term_destroy.argtypes = [POINTER(TickitTerm)]
-tickit_term_get_termtype = _libraries['libtickit.so'].tickit_term_get_termtype
-tickit_term_get_termtype.restype = STRING
-tickit_term_get_termtype.argtypes = [POINTER(TickitTerm)]
-tickit_term_set_output_fd = _libraries['libtickit.so'].tickit_term_set_output_fd
-tickit_term_set_output_fd.restype = None
-tickit_term_set_output_fd.argtypes = [POINTER(TickitTerm), c_int]
-tickit_term_get_output_fd = _libraries['libtickit.so'].tickit_term_get_output_fd
-tickit_term_get_output_fd.restype = c_int
-tickit_term_get_output_fd.argtypes = [POINTER(TickitTerm)]
-tickit_term_set_output_func = _libraries['libtickit.so'].tickit_term_set_output_func
-tickit_term_set_output_func.restype = None
-tickit_term_set_output_func.argtypes = [POINTER(TickitTerm), POINTER(TickitTermOutputFunc), c_void_p]
-tickit_term_set_output_buffer = _libraries['libtickit.so'].tickit_term_set_output_buffer
-tickit_term_set_output_buffer.restype = None
-tickit_term_set_output_buffer.argtypes = [POINTER(TickitTerm), size_t]
-class timeval(Structure):
-    pass
-__time_t = c_long
-__suseconds_t = c_long
-timeval._fields_ = [
-    ('tv_sec', __time_t),
-    ('tv_usec', __suseconds_t),
-]
-tickit_term_await_started = _libraries['libtickit.so'].tickit_term_await_started
-tickit_term_await_started.restype = None
-tickit_term_await_started.argtypes = [POINTER(TickitTerm), POINTER(timeval)]
-tickit_term_flush = _libraries['libtickit.so'].tickit_term_flush
-tickit_term_flush.restype = None
-tickit_term_flush.argtypes = [POINTER(TickitTerm)]
-tickit_term_set_input_fd = _libraries['libtickit.so'].tickit_term_set_input_fd
-tickit_term_set_input_fd.restype = None
-tickit_term_set_input_fd.argtypes = [POINTER(TickitTerm), c_int]
-tickit_term_get_input_fd = _libraries['libtickit.so'].tickit_term_get_input_fd
-tickit_term_get_input_fd.restype = c_int
-tickit_term_get_input_fd.argtypes = [POINTER(TickitTerm)]
-tickit_term_get_utf8 = _libraries['libtickit.so'].tickit_term_get_utf8
-tickit_term_get_utf8.restype = c_int
-tickit_term_get_utf8.argtypes = [POINTER(TickitTerm)]
-tickit_term_set_utf8 = _libraries['libtickit.so'].tickit_term_set_utf8
-tickit_term_set_utf8.restype = None
-tickit_term_set_utf8.argtypes = [POINTER(TickitTerm), c_int]
-tickit_term_input_push_bytes = _libraries['libtickit.so'].tickit_term_input_push_bytes
-tickit_term_input_push_bytes.restype = None
-tickit_term_input_push_bytes.argtypes = [POINTER(TickitTerm), STRING, size_t]
-tickit_term_input_readable = _libraries['libtickit.so'].tickit_term_input_readable
-tickit_term_input_readable.restype = None
-tickit_term_input_readable.argtypes = [POINTER(TickitTerm)]
-tickit_term_input_check_timeout = _libraries['libtickit.so'].tickit_term_input_check_timeout
-tickit_term_input_check_timeout.restype = c_int
-tickit_term_input_check_timeout.argtypes = [POINTER(TickitTerm)]
-tickit_term_input_wait = _libraries['libtickit.so'].tickit_term_input_wait
-tickit_term_input_wait.restype = None
-tickit_term_input_wait.argtypes = [POINTER(TickitTerm), POINTER(timeval)]
-tickit_term_get_size = _libraries['libtickit.so'].tickit_term_get_size
-tickit_term_get_size.restype = None
-tickit_term_get_size.argtypes = [POINTER(TickitTerm), POINTER(c_int), POINTER(c_int)]
-tickit_term_set_size = _libraries['libtickit.so'].tickit_term_set_size
-tickit_term_set_size.restype = None
-tickit_term_set_size.argtypes = [POINTER(TickitTerm), c_int, c_int]
-tickit_term_refresh_size = _libraries['libtickit.so'].tickit_term_refresh_size
-tickit_term_refresh_size.restype = None
-tickit_term_refresh_size.argtypes = [POINTER(TickitTerm)]
-TickitTermEventFn = CFUNCTYPE(None, POINTER(TickitTerm), TickitEventType, POINTER(TickitEvent), c_void_p)
-tickit_term_bind_event = _libraries['libtickit.so'].tickit_term_bind_event
-tickit_term_bind_event.restype = c_int
-tickit_term_bind_event.argtypes = [POINTER(TickitTerm), TickitEventType, POINTER(TickitTermEventFn), c_void_p]
-tickit_term_unbind_event_id = _libraries['libtickit.so'].tickit_term_unbind_event_id
-tickit_term_unbind_event_id.restype = None
-tickit_term_unbind_event_id.argtypes = [POINTER(TickitTerm), c_int]
-tickit_term_print = _libraries['libtickit.so'].tickit_term_print
-tickit_term_print.restype = None
-tickit_term_print.argtypes = [POINTER(TickitTerm), STRING]
-tickit_term_printn = _libraries['libtickit.so'].tickit_term_printn
-tickit_term_printn.restype = None
-tickit_term_printn.argtypes = [POINTER(TickitTerm), STRING, size_t]
-tickit_term_printf = _libraries['libtickit.so'].tickit_term_printf
-tickit_term_printf.restype = None
-tickit_term_printf.argtypes = [POINTER(TickitTerm), STRING]
-class __va_list_tag(Structure):
-    pass
-tickit_term_vprintf = _libraries['libtickit.so'].tickit_term_vprintf
-tickit_term_vprintf.restype = None
-tickit_term_vprintf.argtypes = [POINTER(TickitTerm), STRING, POINTER(__va_list_tag)]
-tickit_term_goto = _libraries['libtickit.so'].tickit_term_goto
-tickit_term_goto.restype = c_int
-tickit_term_goto.argtypes = [POINTER(TickitTerm), c_int, c_int]
-tickit_term_move = _libraries['libtickit.so'].tickit_term_move
-tickit_term_move.restype = None
-tickit_term_move.argtypes = [POINTER(TickitTerm), c_int, c_int]
-tickit_term_scrollrect = _libraries['libtickit.so'].tickit_term_scrollrect
-tickit_term_scrollrect.restype = c_int
-tickit_term_scrollrect.argtypes = [POINTER(TickitTerm), c_int, c_int, c_int, c_int, c_int, c_int]
-tickit_term_chpen = _libraries['libtickit.so'].tickit_term_chpen
-tickit_term_chpen.restype = None
-tickit_term_chpen.argtypes = [POINTER(TickitTerm), POINTER(TickitPen)]
-tickit_term_setpen = _libraries['libtickit.so'].tickit_term_setpen
-tickit_term_setpen.restype = None
-tickit_term_setpen.argtypes = [POINTER(TickitTerm), POINTER(TickitPen)]
-tickit_term_clear = _libraries['libtickit.so'].tickit_term_clear
-tickit_term_clear.restype = None
-tickit_term_clear.argtypes = [POINTER(TickitTerm)]
-tickit_term_erasech = _libraries['libtickit.so'].tickit_term_erasech
-tickit_term_erasech.restype = None
-tickit_term_erasech.argtypes = [POINTER(TickitTerm), c_int, c_int]
+def mkfunc(prefix, first=None):
+    @wraps(function)
+    def func(name, restype, *argtypes):
+        if first is not None:
+            argtypes.insert(0, first)
 
-# values for enumeration 'TickitTermCtl'
-TickitTermCtl = c_int # enum
+        name = '_'.join([prefix, name])
 
-# values for enumeration 'TickitTermMouseMode'
-TickitTermMouseMode = c_int # enum
+        function(name, restype, *argtypes)
 
-# values for enumeration 'TickitTermCursorShape'
-TickitTermCursorShape = c_int # enum
-tickit_term_getctl_int = _libraries['libtickit.so'].tickit_term_getctl_int
-tickit_term_getctl_int.restype = c_int
-tickit_term_getctl_int.argtypes = [POINTER(TickitTerm), TickitTermCtl, POINTER(c_int)]
-tickit_term_setctl_int = _libraries['libtickit.so'].tickit_term_setctl_int
-tickit_term_setctl_int.restype = c_int
-tickit_term_setctl_int.argtypes = [POINTER(TickitTerm), TickitTermCtl, c_int]
-tickit_term_setctl_str = _libraries['libtickit.so'].tickit_term_setctl_str
-tickit_term_setctl_str.restype = c_int
-tickit_term_setctl_str.argtypes = [POINTER(TickitTerm), TickitTermCtl, STRING]
-tickit_string_seqlen = _libraries['libtickit.so'].tickit_string_seqlen
-tickit_string_seqlen.restype = c_int
-tickit_string_seqlen.argtypes = [c_long]
-tickit_string_putchar = _libraries['libtickit.so'].tickit_string_putchar
-tickit_string_putchar.restype = size_t
-tickit_string_putchar.argtypes = [STRING, size_t, c_long]
-class TickitStringPos(Structure):
-    pass
-TickitStringPos._fields_ = [
-    ('bytes', size_t),
-    ('codepoints', c_int),
-    ('graphemes', c_int),
-    ('columns', c_int),
-]
-tickit_string_count = _libraries['libtickit.so'].tickit_string_count
-tickit_string_count.restype = size_t
-tickit_string_count.argtypes = [STRING, POINTER(TickitStringPos), POINTER(TickitStringPos)]
-tickit_string_countmore = _libraries['libtickit.so'].tickit_string_countmore
-tickit_string_countmore.restype = size_t
-tickit_string_countmore.argtypes = [STRING, POINTER(TickitStringPos), POINTER(TickitStringPos)]
-tickit_string_ncount = _libraries['libtickit.so'].tickit_string_ncount
-tickit_string_ncount.restype = size_t
-tickit_string_ncount.argtypes = [STRING, size_t, POINTER(TickitStringPos), POINTER(TickitStringPos)]
-tickit_string_ncountmore = _libraries['libtickit.so'].tickit_string_ncountmore
-tickit_string_ncountmore.restype = size_t
-tickit_string_ncountmore.argtypes = [STRING, size_t, POINTER(TickitStringPos), POINTER(TickitStringPos)]
-tickit_string_mbswidth = _libraries['libtickit.so'].tickit_string_mbswidth
-tickit_string_mbswidth.restype = c_int
-tickit_string_mbswidth.argtypes = [STRING]
-tickit_string_byte2col = _libraries['libtickit.so'].tickit_string_byte2col
-tickit_string_byte2col.restype = c_int
-tickit_string_byte2col.argtypes = [STRING, size_t]
-tickit_string_col2byte = _libraries['libtickit.so'].tickit_string_col2byte
-tickit_string_col2byte.restype = size_t
-tickit_string_col2byte.argtypes = [STRING, c_int]
-class TickitRenderBuffer(Structure):
-    pass
-TickitRenderBuffer._fields_ = [
-]
-tickit_renderbuffer_new = _libraries['libtickit.so'].tickit_renderbuffer_new
-tickit_renderbuffer_new.restype = POINTER(TickitRenderBuffer)
-tickit_renderbuffer_new.argtypes = [c_int, c_int]
-tickit_renderbuffer_destroy = _libraries['libtickit.so'].tickit_renderbuffer_destroy
-tickit_renderbuffer_destroy.restype = None
-tickit_renderbuffer_destroy.argtypes = [POINTER(TickitRenderBuffer)]
-tickit_renderbuffer_get_size = _libraries['libtickit.so'].tickit_renderbuffer_get_size
-tickit_renderbuffer_get_size.restype = None
-tickit_renderbuffer_get_size.argtypes = [POINTER(TickitRenderBuffer), POINTER(c_int), POINTER(c_int)]
-tickit_renderbuffer_translate = _libraries['libtickit.so'].tickit_renderbuffer_translate
-tickit_renderbuffer_translate.restype = None
-tickit_renderbuffer_translate.argtypes = [POINTER(TickitRenderBuffer), c_int, c_int]
-tickit_renderbuffer_clip = _libraries['libtickit.so'].tickit_renderbuffer_clip
-tickit_renderbuffer_clip.restype = None
-tickit_renderbuffer_clip.argtypes = [POINTER(TickitRenderBuffer), POINTER(TickitRect)]
-tickit_renderbuffer_mask = _libraries['libtickit.so'].tickit_renderbuffer_mask
-tickit_renderbuffer_mask.restype = None
-tickit_renderbuffer_mask.argtypes = [POINTER(TickitRenderBuffer), POINTER(TickitRect)]
-tickit_renderbuffer_has_cursorpos = _libraries['libtickit.so'].tickit_renderbuffer_has_cursorpos
-tickit_renderbuffer_has_cursorpos.restype = c_int
-tickit_renderbuffer_has_cursorpos.argtypes = [POINTER(TickitRenderBuffer)]
-tickit_renderbuffer_get_cursorpos = _libraries['libtickit.so'].tickit_renderbuffer_get_cursorpos
-tickit_renderbuffer_get_cursorpos.restype = None
-tickit_renderbuffer_get_cursorpos.argtypes = [POINTER(TickitRenderBuffer), POINTER(c_int), POINTER(c_int)]
-tickit_renderbuffer_goto = _libraries['libtickit.so'].tickit_renderbuffer_goto
-tickit_renderbuffer_goto.restype = None
-tickit_renderbuffer_goto.argtypes = [POINTER(TickitRenderBuffer), c_int, c_int]
-tickit_renderbuffer_ungoto = _libraries['libtickit.so'].tickit_renderbuffer_ungoto
-tickit_renderbuffer_ungoto.restype = None
-tickit_renderbuffer_ungoto.argtypes = [POINTER(TickitRenderBuffer)]
-tickit_renderbuffer_setpen = _libraries['libtickit.so'].tickit_renderbuffer_setpen
-tickit_renderbuffer_setpen.restype = None
-tickit_renderbuffer_setpen.argtypes = [POINTER(TickitRenderBuffer), POINTER(TickitPen)]
-tickit_renderbuffer_reset = _libraries['libtickit.so'].tickit_renderbuffer_reset
-tickit_renderbuffer_reset.restype = None
-tickit_renderbuffer_reset.argtypes = [POINTER(TickitRenderBuffer)]
-tickit_renderbuffer_save = _libraries['libtickit.so'].tickit_renderbuffer_save
-tickit_renderbuffer_save.restype = None
-tickit_renderbuffer_save.argtypes = [POINTER(TickitRenderBuffer)]
-tickit_renderbuffer_savepen = _libraries['libtickit.so'].tickit_renderbuffer_savepen
-tickit_renderbuffer_savepen.restype = None
-tickit_renderbuffer_savepen.argtypes = [POINTER(TickitRenderBuffer)]
-tickit_renderbuffer_restore = _libraries['libtickit.so'].tickit_renderbuffer_restore
-tickit_renderbuffer_restore.restype = None
-tickit_renderbuffer_restore.argtypes = [POINTER(TickitRenderBuffer)]
-tickit_renderbuffer_skip_at = _libraries['libtickit.so'].tickit_renderbuffer_skip_at
-tickit_renderbuffer_skip_at.restype = None
-tickit_renderbuffer_skip_at.argtypes = [POINTER(TickitRenderBuffer), c_int, c_int, c_int]
-tickit_renderbuffer_skip = _libraries['libtickit.so'].tickit_renderbuffer_skip
-tickit_renderbuffer_skip.restype = None
-tickit_renderbuffer_skip.argtypes = [POINTER(TickitRenderBuffer), c_int]
-tickit_renderbuffer_skip_to = _libraries['libtickit.so'].tickit_renderbuffer_skip_to
-tickit_renderbuffer_skip_to.restype = None
-tickit_renderbuffer_skip_to.argtypes = [POINTER(TickitRenderBuffer), c_int]
-tickit_renderbuffer_text_at = _libraries['libtickit.so'].tickit_renderbuffer_text_at
-tickit_renderbuffer_text_at.restype = c_int
-tickit_renderbuffer_text_at.argtypes = [POINTER(TickitRenderBuffer), c_int, c_int, STRING, POINTER(TickitPen)]
-tickit_renderbuffer_text = _libraries['libtickit.so'].tickit_renderbuffer_text
-tickit_renderbuffer_text.restype = c_int
-tickit_renderbuffer_text.argtypes = [POINTER(TickitRenderBuffer), STRING, POINTER(TickitPen)]
-tickit_renderbuffer_erase_at = _libraries['libtickit.so'].tickit_renderbuffer_erase_at
-tickit_renderbuffer_erase_at.restype = None
-tickit_renderbuffer_erase_at.argtypes = [POINTER(TickitRenderBuffer), c_int, c_int, c_int, POINTER(TickitPen)]
-tickit_renderbuffer_erase = _libraries['libtickit.so'].tickit_renderbuffer_erase
-tickit_renderbuffer_erase.restype = None
-tickit_renderbuffer_erase.argtypes = [POINTER(TickitRenderBuffer), c_int, POINTER(TickitPen)]
-tickit_renderbuffer_erase_to = _libraries['libtickit.so'].tickit_renderbuffer_erase_to
-tickit_renderbuffer_erase_to.restype = None
-tickit_renderbuffer_erase_to.argtypes = [POINTER(TickitRenderBuffer), c_int, POINTER(TickitPen)]
-tickit_renderbuffer_eraserect = _libraries['libtickit.so'].tickit_renderbuffer_eraserect
-tickit_renderbuffer_eraserect.restype = None
-tickit_renderbuffer_eraserect.argtypes = [POINTER(TickitRenderBuffer), POINTER(TickitRect), POINTER(TickitPen)]
-tickit_renderbuffer_clear = _libraries['libtickit.so'].tickit_renderbuffer_clear
-tickit_renderbuffer_clear.restype = None
-tickit_renderbuffer_clear.argtypes = [POINTER(TickitRenderBuffer), POINTER(TickitPen)]
-tickit_renderbuffer_char_at = _libraries['libtickit.so'].tickit_renderbuffer_char_at
-tickit_renderbuffer_char_at.restype = None
-tickit_renderbuffer_char_at.argtypes = [POINTER(TickitRenderBuffer), c_int, c_int, c_long, POINTER(TickitPen)]
-tickit_renderbuffer_char = _libraries['libtickit.so'].tickit_renderbuffer_char
-tickit_renderbuffer_char.restype = None
-tickit_renderbuffer_char.argtypes = [POINTER(TickitRenderBuffer), c_long, POINTER(TickitPen)]
+    return function
 
-# values for enumeration 'TickitLineStyle'
-TickitLineStyle = c_int # enum
+class CEnum(IntEnum):
+    @clasmethod
+    def from_param(cls, self):
+        if not isinstance(self, cls):
+            raise TypeError('invalid enum')
+        return self
 
-# values for enumeration 'TickitLineCaps'
-TickitLineCaps = c_int # enum
-tickit_renderbuffer_hline_at = _libraries['libtickit.so'].tickit_renderbuffer_hline_at
-tickit_renderbuffer_hline_at.restype = None
-tickit_renderbuffer_hline_at.argtypes = [POINTER(TickitRenderBuffer), c_int, c_int, c_int, TickitLineStyle, POINTER(TickitPen), TickitLineCaps]
-tickit_renderbuffer_vline_at = _libraries['libtickit.so'].tickit_renderbuffer_vline_at
-tickit_renderbuffer_vline_at.restype = None
-tickit_renderbuffer_vline_at.argtypes = [POINTER(TickitRenderBuffer), c_int, c_int, c_int, TickitLineStyle, POINTER(TickitPen), TickitLineCaps]
-tickit_renderbuffer_flush_to_term = _libraries['libtickit.so'].tickit_renderbuffer_flush_to_term
-tickit_renderbuffer_flush_to_term.restype = None
-tickit_renderbuffer_flush_to_term.argtypes = [POINTER(TickitRenderBuffer), POINTER(TickitTerm)]
-class TickitRenderBufferLineMask(Structure):
-    pass
-TickitRenderBufferLineMask._fields_ = [
-    ('north', c_char),
-    ('south', c_char),
-    ('east', c_char),
-    ('west', c_char),
-]
-tickit_renderbuffer_get_cell_active = _libraries['libtickit.so'].tickit_renderbuffer_get_cell_active
-tickit_renderbuffer_get_cell_active.restype = c_int
-tickit_renderbuffer_get_cell_active.argtypes = [POINTER(TickitRenderBuffer), c_int, c_int]
-tickit_renderbuffer_get_cell_text = _libraries['libtickit.so'].tickit_renderbuffer_get_cell_text
-tickit_renderbuffer_get_cell_text.restype = size_t
-tickit_renderbuffer_get_cell_text.argtypes = [POINTER(TickitRenderBuffer), c_int, c_int, STRING, size_t]
-tickit_renderbuffer_get_cell_linemask = _libraries['libtickit.so'].tickit_renderbuffer_get_cell_linemask
-tickit_renderbuffer_get_cell_linemask.restype = TickitRenderBufferLineMask
-tickit_renderbuffer_get_cell_linemask.argtypes = [POINTER(TickitRenderBuffer), c_int, c_int]
-tickit_renderbuffer_get_cell_pen = _libraries['libtickit.so'].tickit_renderbuffer_get_cell_pen
-tickit_renderbuffer_get_cell_pen.restype = POINTER(TickitPen)
-tickit_renderbuffer_get_cell_pen.argtypes = [POINTER(TickitRenderBuffer), c_int, c_int]
-class TickitRenderBufferSpanInfo(Structure):
-    pass
-TickitRenderBufferSpanInfo._fields_ = [
-    ('is_active', c_int),
-    ('n_columns', c_int),
-    ('text', STRING),
-    ('len', size_t),
-    ('pen', POINTER(TickitPen)),
-]
-tickit_renderbuffer_get_span = _libraries['libtickit.so'].tickit_renderbuffer_get_span
-tickit_renderbuffer_get_span.restype = size_t
-tickit_renderbuffer_get_span.argtypes = [POINTER(TickitRenderBuffer), c_int, c_int, POINTER(TickitRenderBufferSpanInfo), STRING, size_t]
-__va_list_tag._fields_ = [
-]
-__all__ = ['tickit_renderbuffer_translate',
-           'tickit_renderbuffer_hline_at',
-           'tickit_pen_unbind_event_id', 'tickit_term_goto',
-           'TickitEvent', 'TICKIT_PEN_STRIKE', 'TICKIT_MOD_CTRL',
-           'tickit_pen_nondefault_attr', 'TICKIT_TERM_MOUSEMODE_MOVE',
-           'tickit_string_byte2col', 'tickit_term_destroy',
-           'TICKIT_PEN_ALTFONT', 'size_t',
-           'TICKIT_TERMCTL_KEYPAD_APP', 'tickit_string_mbswidth',
-           'tickit_renderbuffer_get_cell_text',
-           'tickit_pen_is_nonempty', 'tickit_renderbuffer_ungoto',
-           'TICKIT_KEYEV_KEY', 'tickit_renderbuffer_get_size',
-           'TICKIT_TERM_MOUSEMODE_OFF', 'TICKIT_PEN_UNDER',
-           'tickit_rect_subtract', 'tickit_renderbuffer_setpen',
-           'tickit_pen_new_attrs', 'TICKIT_PEN_BG',
-           'tickit_term_move', 'tickit_renderbuffer_eraserect',
-           'tickit_renderbuffer_get_cell_pen', 'tickit_pen_attrtype',
-           'tickit_pen_clear', 'tickit_pen_get_colour_attr',
-           'tickit_pen_set_colour_attr_desc',
-           'tickit_rectset_get_rects', 'tickit_term_printn',
-           'TICKIT_N_PEN_ATTRS', 'tickit_term_vprintf',
-           'TICKIT_TERMCTL_CURSORVIS', 'tickit_term_printf',
-           '__time_t', 'tickit_pen_clone',
-           'tickit_term_unbind_event_id',
-           'tickit_term_input_check_timeout',
-           'tickit_rectset_subtract', 'TickitRenderBufferSpanInfo',
-           'tickit_renderbuffer_clear', 'tickit_string_col2byte',
-           'TickitLineStyle', 'tickit_term_setctl_str',
-           'tickit_term_set_input_fd', 'tickit_term_chpen',
-           'tickit_rect_add', 'TICKIT_MOUSEEV_RELEASE',
-           'TICKIT_TERM_MOUSEMODE_CLICK', 'tickit_pen_destroy',
-           'tickit_renderbuffer_char_at', '__va_list_tag',
-           'TICKIT_TERM_CURSORSHAPE_UNDER',
-           'tickit_renderbuffer_skip_to', 'TICKIT_LINECAP_START',
-           'tickit_renderbuffer_skip_at', 'tickit_rect_intersect',
-           'TickitEventType', 'tickit_term_input_readable',
-           'TICKIT_TERMCTL_ICON_TEXT', 'tickit_renderbuffer_reset',
-           'tickit_pen_copy', 'TickitRenderBufferLineMask',
-           'TickitTermOutputFunc', 'tickit_renderbuffer_restore',
-           'tickit_renderbuffer_get_cell_active',
-           'tickit_pen_has_attr', 'tickit_renderbuffer_savepen',
-           'tickit_term_new', 'TICKIT_EV_CHANGE',
-           'tickit_term_set_output_func', 'tickit_renderbuffer_mask',
-           'tickit_rectset_add', 'tickit_renderbuffer_has_cursorpos',
-           'tickit_renderbuffer_get_cursorpos',
-           'tickit_string_ncount', 'tickit_renderbuffer_clip',
-           'tickit_renderbuffer_get_span', 'TickitPen',
-           'tickit_rect_init_sized', 'TICKIT_EV_RESIZE',
-           'tickit_pen_bind_event', 'tickit_term_setctl_int',
-           'tickit_pen_new', 'tickit_rectset_rects',
-           'tickit_term_get_size', 'TICKIT_MOUSEWHEEL_DOWN',
-           'tickit_renderbuffer_vline_at', 'tickit_rectset_contains',
-           'TickitRectSet', 'tickit_term_get_output_fd',
-           'TickitTermCtl', 'tickit_string_seqlen',
-           'tickit_pen_equiv_attr', 'tickit_string_ncountmore',
-           'TICKIT_LINE_DOUBLE', 'tickit_renderbuffer_flush_to_term',
-           'tickit_term_input_push_bytes', 'TICKIT_EV_MOUSE',
-           'TICKIT_TERMCTL_ALTSCREEN', 'tickit_pen_clear_attr',
-           'TICKIT_TERMCTL_CURSORSHAPE', 'TICKIT_LINE_THICK',
-           'TICKIT_EV_KEY', 'TICKIT_MOUSEEV_PRESS',
-           'tickit_term_refresh_size',
-           'tickit_term_set_output_buffer', 'tickit_term_erasech',
-           'TICKIT_TERMCTL_CURSORBLINK', 'tickit_term_setpen',
-           'tickit_rect_contains', 'tickit_rect_intersects',
-           'TICKIT_EV_UNBIND', 'tickit_term_get_input_fd',
-           'tickit_pen_attrname', 'TICKIT_PENTYPE_COLOUR',
-           'tickit_term_new_for_termtype', 'TICKIT_MOUSEEV_WHEEL',
-           'tickit_term_flush', 'TICKIT_KEYEV_TEXT',
-           'tickit_renderbuffer_erase_to', 'tickit_pen_copy_attr',
-           'TickitMouseEventType', 'TICKIT_PENTYPE_INT',
-           'tickit_rectset_clear', 'TICKIT_PEN_FG',
-           'TickitKeyEventType', 'TICKIT_MOUSEWHEEL_UP',
-           'TICKIT_TERM_CURSORSHAPE_LEFT_BAR', 'TickitPenEventFn',
-           'tickit_pen_set_colour_attr', 'tickit_rectset_intersects',
-           'TICKIT_TERM_MOUSEMODE_DRAG', 'TickitTermCursorShape',
-           'tickit_term_scrollrect', 'tickit_renderbuffer_skip',
-           '__suseconds_t', 'tickit_pen_lookup_attr',
-           'TickitRenderBuffer', 'tickit_rectset_new',
-           'TICKIT_MOUSEEV_DRAG', 'TICKIT_TERMCTL_TITLE_TEXT',
-           'tickit_term_get_termtype', 'tickit_string_count',
-           'tickit_rectset_destroy', 'TICKIT_MOD_SHIFT',
-           'tickit_renderbuffer_goto', 'tickit_term_get_utf8',
-           'tickit_renderbuffer_get_cell_linemask', 'TickitRect',
-           'TICKIT_LINECAP_END', 'TICKIT_TERM_CURSORSHAPE_BLOCK',
-           'tickit_renderbuffer_save', 'TICKIT_PEN_ITALIC',
-           'tickit_term_clear', 'tickit_string_countmore',
-           'tickit_renderbuffer_text', 'tickit_term_getctl_int',
-           'tickit_pen_is_nondefault', 'TickitPenAttr',
-           'TickitStringPos', 'tickit_renderbuffer_erase_at',
-           'timeval', 'tickit_term_set_size',
-           'tickit_renderbuffer_char', 'TICKIT_MOD_ALT',
-           'tickit_term_print', 'TickitPenAttrType', 'TickitTerm',
-           'TICKIT_TERMCTL_COLORS', 'tickit_term_bind_event',
-           'tickit_pen_set_bool_attr', 'TickitTermMouseMode',
-           'tickit_renderbuffer_destroy', 'TICKIT_PEN_REVERSE',
-           'tickit_renderbuffer_text_at', 'tickit_pen_equiv',
-           'tickit_term_set_output_fd', 'TICKIT_TERMCTL_MOUSE',
-           'TICKIT_PEN_BOLD', 'tickit_pen_get_bool_attr',
-           'tickit_term_input_wait', 'tickit_renderbuffer_erase',
-           'tickit_term_set_utf8', 'tickit_pen_get_int_attr',
-           'TICKIT_LINE_SINGLE', 'TICKIT_PENTYPE_BOOL',
-           'TickitTermEventFn', 'tickit_renderbuffer_new',
-           'tickit_string_putchar', 'tickit_rect_init_bounded',
-           'tickit_term_await_started', 'tickit_pen_set_int_attr',
-           'TICKIT_LINECAP_BOTH', 'TICKIT_TERMCTL_ICONTITLE_TEXT',
-           'TickitLineCaps']
+class Maybe(CEnum):
+    unknown = -1
+    false   = False
+    true    = True
+
+class EventType(CEnum):
+    resize = 0x1
+    key    = 0x2
+    mouse  = 0x4
+    change = 0x8
+    unbind = 0x80000000
+
+class KeyEventType(CEnum):
+    key  = 1
+    text = 2
+
+class MouseEventType(CEnum):
+    press   = 1
+    drag    = 2
+    release = 3
+    wheel   = 4
+
+class MouseWheel(CEnum):
+    up   = 1
+    down = 2
+
+class Mod(CEnum):
+    shift = 1
+    alt   = 2
+    ctrl  = 4
+
+class Event(Structure):
+    _fields_ = [
+        ('lines',  c_int),
+        ('cols',   c_int),
+        ('str',    c_char_p),
+        ('button', c_int),
+        ('line',   c_int),
+        ('col',    c_int),
+        ('mod',    c_int),
+    ]
+
+class pen(Structure): pass
+
+class PenAttribute(CEnum):
+    foreground = 0
+    background = 1
+    bold       = 2
+    underline  = 3
+    italic     = 4
+    reverse    = 5
+    strike     = 6
+    altfont    = 7
+    blink      = 8
+
+class PenAttribueType(CEnum):
+    bool   = 0
+    int    = 1
+    colour = 2
+    color  = 2 # for Americans
+
+Pen_p = POINTER(pen)
+
+_fpen = mkfunc('pen', Pen_p)
+
+function('pen_new', Pen_p, None)
+_fpen('clone', Pen_p)
+_fpen('destroy', None)
+
+_fpen('has_attr',        c_bool, PenAttribute)
+_fpen('is_nonempty',     c_bool)
+_fpen('nondefault_attr', c_bool, PenAttribute)
+_fpen('is_nondefault',   c_bool)
+
+_fpen('get_bool_attr', c_bool, PenAttribute)
+_fpen('set_bool_attr', None, PenAttribute, c_bool)
+
+_fpen('get_int_attr', c_int, PenAttribute)
+_fpen('set_int_attr', None, PenAttribute, c_int)
+
+_fpen('get_colour_attr', c_int, PenAttribute)
+_fpen('set_colour_attr', None, PenAttribute, c_int)
+_fpen('set_colour_attr_desc', None, PenAttribute, c_string)
+# for Americans
+pen_get_color_attr       = pen_get_colour_attr
+pen_set_color_attr       = pen_set_colour_attr
+pen_set_colour_attr_desc = pen_set_colour_attr_desc
+
+_fpen('clear_attr', None, PenAttribute)
+_fpen('clear', None)
+
+_fpen('equiv_attr', c_bool, Pen_p, PenAttribute)
+_fpen('equiv', c_bool, Pen_p)
+
+_fpen('copy_attr', None, Pen_p, PenAttribute)
+_fpen('copy', None, Pen_p, c_bool)
+
+function('pen_attrtype', PenAttribueType, PenAttribute)
+function('pen_attrname', c_string, PenAttribute)
+function('pen_lookup_attr', PenAttribute, c_string)
+
+class rect(Structure):
+    _fields_ = [
+        ('top', c_int),
+        ('left', c_int),
+        ('lines', c_int),
+        ('cols', c_int)
+    ]
+
+Rect_p = POINTER(rect)
+
+_frect = mkfunc('rect', Rect_p)
+_frect('init_sized', None, c_int, c_int, c_int, c_int)
+_frect('init_bounded', None, c_int, c_int, c_int, c_int)
+
+_frect('intersect', c_bool, Rect_p, Rect_p)
+_frect('intersects', c_bool, Rect_p)
+_frect('contains', c_bool, Rect_p)
+
+function('rect_add', c_int, rect * 3, Rect_p, Rect_p)
+function('rect_subtract', c_int, rect * 4, Rect_p, Rect_p)
+
+class rectset(Structure): pass
+
+RectSet_p = POINTER(rectset)
+
+_frectset = mkfunc('rectset', RectSet_p)
+function('rectset_new', RectSet_p, None)
+_frectset('destroy', None)
+_frectset('clear',   None)
+
+_frectset('rects',     c_size_t)
+_frectset('get_rects', c_size_t, RectSet_p, c_size_t)
+
+_frectset('add',      None, Rect_p)
+_frectset('subtract', None, Rect_p)
+
+_frectset('intersects', c_bool, Rect_p)
+_frectset('contains',   c_bool, Rect_p)
+
+class term(Structure): pass
+
+Term_p = POINTER(term)
+
+TermOutputFunc = CFUNCTYPE(None, Term_p, c_string, c_size_t, c_void_p)
+
+_fterm = mkfunc('term', Term_p)
+function('term_new', Term_p, None)
+function('term_new_for_termtype', Term_p, c_string)
+_fterm('destroy', None)
+_fterm('get_termtype', c_string)
+
+_fterm('set_output_fd', None, c_int)
+_fterm('get_output_fd', c_int)
+_fterm('set_output_func', None, TermOutputFunc, c_void_p)
+_fterm('set_output_buffer', None, c_size_t)
+
+_fterm('await_started_msec', None, c_long)
+_fterm('flush', None)
+
+_fterm('set_input_fd', None, c_int)
+_fterm('get_input_fd', c_int)
+
+_fterm('get_utf8', Maybe)
+_fterm('set_utf8', None, c_bool)
+
+_fterm('input_push_bytes', None, c_string, c_size_t)
+_fterm('input_readable', None)
+_fterm('input_check_timeout_msec', c_long)
+_fterm('input_wait', None, c_long)
+
+_fterm('get_size', None, POINTER(c_int), POINTER(c_int))
+_fterm('set_size', None, c_int, c_int)
+_fterm('refresh_size', None)
+
+TermEventFunc = CFUNCTYPE(None, Term_p, EventType, Event, c_void_p)
+
+_fterm('bind_event', c_int, EventType, TermEventFunc, c_void_p)
+_fterm('unbind_event_id', None, c_int)
+
+_fterm('print', None, c_string)
+_fterm('printn', None, c_string, c_size_t)
+_fterm('goto', c_bool, c_int, c_int)
+_fterm('move', None, c_int, c_int)
+_fterm('scrollrect', c_bool, c_int, c_int, c_int, c_int, c_int, c_int)
+
+_fterm('chpen', None, Pen_p)
+_fterm('setpen', None, Pen_p)
+
+_fterm('clear', None)
+_fterm('erasech', None, c_int, Maybe)
+
+class TermControl(CEnum):
+    altscreen      =  1
+    cursorvis      =  2
+    mouse          =  3
+    cursorblink    =  4
+    cursorshape    =  5
+    icon_text      =  6
+    title_text     =  7
+    icontitle_text =  8
+    keypad_app     =  9
+    colors         = 10
+
+class MouseMode(CEnum):
+    off   = 0
+    click = 1
+    drag  = 2
+    move  = 3
+
+class CursorShape(CEnum):
+    block    = 1
+    under    = 2
+    left_bar = 3
+
+_fterm('getctl_int', c_bool, TermControl, POINTER(c_int))
+_fterm('setctl_int', c_bool, TermControl, c_int)
+_fterm('setctl_str', c_bool, TermControl, c_string)
+
+function('string_seqlen', c_int, c_long)
+function('string_putchar', c_size_t, c_string, c_size_t, c_long)
+
+class stringpos(Structure):
+    _fields_ = [
+        ('bytes', c_size_t),
+        ('codepoints', c_int),
+        ('graphemes', c_int),
+        ('columns', c_int),
+    ]
+
+StringPos_p = POINTER(stringpos)
+
+function('string_count', c_size_t, c_string, StringPos_p, StringPos_p)
+function('string_countmore', c_size_t, c_string, StringPos_p, StringPos_p)
+function('string_ncount', c_size_t, c_string, c_size_t, StringPos_p, StringPos_p)
+function('string_ncountmore', c_size_t, c_string, c_size_t, StringPos_p, StringPos_p)
+
+function('string_mbswidth', c_int, c_string)
+function('string_byte2col', c_int, c_string, c_size_t)
+function('string_col2byte', c_size_t, c_string, c_int)
+
+class renderbuffer(Structure): pass
+
+RenderBuffer_p = POINTER(renderbuffer)
+
+_frenderbuffer = mkfunc('renderbuffer', RenderBuffer_p)
+function('renderbuffer_new', RenderBuffer_p, c_int, c_int)
+_frenderbuffer('destroy', None)
+
+_frenderbuffer('get_size', None, POINTER(c_int), POINTER(c_int))
+
+_frenderbuffer('translate', None, c_int, c_int)
+_frenderbuffer('clip', None, Rect_p)
+_frenderbuffer('mask', None, Rect_p)
+
+_frenderbuffer('has_cursorpos', c_bool)
+_frenderbuffer('get_cursorpos', None, POINTER(c_int), POINTER(c_int))
+_frenderbuffer('goto', None, c_int, c_int)
+_frenderbuffer('ungoto', None)
+
+_frenderbuffer('setpen', None, Pen_p)
+
+_frenderbuffer('reset', None)
+_frenderbuffer('save', None)
+_frenderbuffer('savepen', None)
+_frenderbuffer('restore', None)
+
+_frenderbuffer('skip_at', None, c_int, c_int, c_int)
+_frenderbuffer('skip', None, c_int)
+_frenderbuffer('skip_to', None, c_int)
+_frenderbuffer('text_at', c_int, c_int, c_int, c_string, Pen_p)
+_frenderbuffer('text', c_int, c_string, Pen_p)
+_frenderbuffer('erase_at', None, c_int, c_int, c_int, Pen_p)
+_frenderbuffer('erase', None, c_int, Pen_p)
+_frenderbuffer('erase_to', None, c_int, Pen_p)
+_frenderbuffer('eraserect', None, Rect_p, Pen_p)
+_frenderbuffer('clear', None, Pen_p)
+_frenderbuffer('char_at', None, c_int, c_int, c_long, Pen_p)
+_frenderbuffer('char', None, c_long, Pen_p)
+
+class LineStyle(CEnum):
+    single = 1
+    double = 2
+    thick  = 3
+
+class LineCaps(CEnum):
+    start = 1
+    end   = 2
+    both  = 3
+
+_frenderbuffer('hline_at', None, c_int, c_int, c_int, LineStyle, Pen_p, LineCaps)
+_frenderbuffer('vline_at', None, c_int, c_int, c_int, LineStyle, Pen_p, LineCaps)
+
+_frenderbuffer('flush_to_term', None, Term_p)
+
+class LineMask(Structure):
+    _fields_ = [
+        ('north', c_char),
+        ('south', c_char),
+        ('east', c_char),
+        ('west', c_char),
+    ]
+
+_frenderbuffer('get_cell_active', c_int, c_int, c_int)
+_frenderbuffer('get_cell_text', c_size_t, c_int, c_int, c_string, c_size_t)
+_frenderbuffer('get_cell_linemask', LineMask, c_int, c_int)
+_frenderbuffer('get_cell_pen', Pen_p, c_int, c_int)
+
+class SpanInfo(CEnum):
+    _fields_ = [
+        ('is_active', c_bool),
+        ('n_columns', c_int),
+        ('text', c_string),
+        ('len', c_size_t),
+        ('pen', Pen_p)
+    ]
+
+_frenderbuffer('get_span', c_size_t, c_int, c_int, SpanInfo, c_string, c_size_t)
