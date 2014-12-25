@@ -1,54 +1,74 @@
 
-import ctypes
-
 try:
     from collections.abc import Container
 except ImportError:
+    # Python 3.0-3.2
     from collections import Container
 
 import tickit._tickit as tickit
 
 class Rect(Container):
+    def __init__(self, *args, **kwargs):
+        if len(args) == 1:
+            if not isinstance(args[0], str):
+                raise TypeError('not a string')
+
+            self.parse(args[0])
+        else:
+            top  = kwargs['top']
+            left = kwargs['left']
+
+            self._rect = tickit.Rect_p()
+
+            if 'lines' in kwargs:
+                lines = kwargs['lines']
+                cols  = kwargs['cols']
+
+                tickit.rect_init_sized(self._rect, top, left, lines, cols)
+            else:
+                bottom = kwargs['bottom']
+                right  = kwargs['right']
+
+                tickit.rect_init_bounded(self._rect, top, left, bottom, right)
+
+    def parse(self, string):
+        self._rect = tickit.Rect_p()
+
+        lt, rt = string.split('..', 1)
+
+        left, top = lt[1:-1].split(',', 1)
+        bottom, right = rt[1:-1].split(',', 1)
+
+        tickit.rect_init_bounded(self._rect, top, left, bottom, right)
+
     @property
     def top(self):
         return self._rect.top
-
     @top.setter
     def top(self, value):
-        if not isinstance(value, int):
-            raise TypeError('not an integer')
-        self._rect.top = ctypes.c_int(value)
+        self._rect.top = value
 
     @property
     def left(self):
         return self._rect.left
-
     @left.setter
     def left(self, value):
-        if not isinstance(value, int):
-            raise TypeError('not an integer')
-        self._rect.left = ctypes.c_int(value)
-
+        self._rect.left = value
+    
     @property
     def lines(self):
         return self._rect.lines
-
     @lines.setter
     def lines(self, value):
-        if not isinstance(value, int):
-            raise TypeError('not an integer')
-        self._rect.lines = ctypes.c_int(value)
-
+        self._rect.lines = value
+    
     @property
     def cols(self):
         return self._rect.cols
-
     @cols.setter
     def cols(self, value):
-        if not isinstance(value, int):
-            raise TypeError('not an integer')
-        self._rect.cols = ctypes.c_int(value)
-
+        self._rect.cols = value
+    
     @property
     def right(self):
         return self.left + self.cols
@@ -57,72 +77,73 @@ class Rect(Container):
     def bottom(self):
         return self.top + self.lines
 
-    def __init__(self, obj=None, **kwargs):
-        if obj is not None:
-            if isinstance(obj, tickit.TickitRect):
-                self._rect = obj
-            elif isinstance(obj, basestring):
-                self._rect = self.parse(obj)
-            else:
-                raise TypeError('object input invalid')
-        else:
-            self._rect = tickit.TickitRect()
-
-            if 'lines' in kwargs:
-                tickit.tickit_rect_init_sized(
-                    self._rect, kwargs['top'], kwargs['left'],
-                    kwargs['lines'], kwargs['cols']
-                )
-            else:
-                tickit.tickit_rect_init_bounded(
-                    self._rect, kwargs['top'], kwargs['left'],
-                    kwargs['right'], kwargs['bottom']
-                )
-
-    def parse(self, string):
-        string = string[1:-1]
-        strings = string.split('..')
-
-        left, top = strings[0][:-1].split(',')
-        right, bottom = strings[1][1:].split(',')
-
-        rect = tickit.TickitRect()
-
-        tickit.tickit_rect_init_bounded(rect, top, left, right, bottom)
-
-        return rect
-
     def add(self, other):
-        rect_arr = tickit.TickitRect * 3
-        rects = rect_arr()
-        count = tickit.tickit_rect_add(rects, self._rect, other._rect)
+        rects = (tickit.rect * 3)()
 
-        return (Rect(obj=rects[x]) for x in range(count))
+        count = tickit.rect_add(rects, self._rect, other._rect)
 
-    def subtract(self, a, b):
-        rect_arr = tickit.TickitRect * 4
-        rects = rect_arr()
-        count = tickit.tickit_rect_subtract(rects, self._rect, other._rect)
+        ret = []
 
-        return (Rect(obj=rects[x]) for x in range(count))
+        for rect in rects:
+            ret.push(Rect(rect.top, rect.left, rect.lines, rect.cols))
+
+        return ret
+
+    def subtract(self, other):
+        rects = (tickit.rect * 4)()
+
+        count = tickit.rect_subtract(rects, self._rect, other._rect)
+
+        ret = []
+
+        for rect in rects:
+            ret.push(Rect(rect.top, rect.left, rect.lines, rect.cols))
+
+        return ret
 
     def intersect(self, other):
-        rect = tickit.TickitRect()
+        rect = tickit.rect()
 
-        intersects = tickit.tickit_rect_intersect(rect, self._rect, other._rect)
-
-        if intersects:
-            return Rect(obj=rect)
+        if tickit.rect_intersect(rect, self._rect, other._rect):
+            return Rect(rect.top, rect.left, rect.lines, rect.cols)
 
         return None
 
     def intersects(self, other):
-        if self.intersect(other) is not None:
-            return True
-        return False
-
-    def contains(self, other):
-        return tickit.tickit_rect_contains(self._rect, other._rect)
+        return self.intersect(other) is not None
 
     def __contains__(self, other):
         return self.contains(other)
+
+    def contains(self, other):
+        return tickit.rect_contains(self._rect, other._rect)
+
+    def translate(self, down, right):
+        return Rect(self.top + down, self.left + right, self.lines, self.cols)
+
+    def __eq__(self, other):
+        return self.equals(other)
+
+    def __ne__(self, other):
+        return not self.equals(other)
+
+    def equals(self, other):
+        return (
+            self.top   == other.top   and
+            self.left  == other.left  and
+            self.lines == other.lines and
+            self.cols  == other.cols
+        )
+
+    def linerange(self, minimum=None, maximum=None):
+        if minimum is None or minimum < self.top:
+            minimum = self.top
+        if maximum is None or maximum > self.bottom:
+            maximum = self.bottom
+
+        start = max(self.top, minimum)
+        stop  = min(self.bottom, maximum)
+
+        return list(range(start, stop))
+
+__all__ = ['Rect']
