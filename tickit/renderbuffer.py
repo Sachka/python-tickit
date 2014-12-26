@@ -129,8 +129,5 @@ class RenderBuffer:
     def char(self, codepoint, pen):
         tickit.renderbuffer_char(byref(self._rb), codepoint, byref(pen._pen))
 
-    def flush_to_window(self, win):
-        raise NotImplementedError('Wait for tickit.window')
-
     def flush_to_term(self, term):
         tickit.renderbuffer_flush_to_term(byref(self._rb), byref(term._term))
