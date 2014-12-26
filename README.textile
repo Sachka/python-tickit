@@ -11,11 +11,11 @@ h1. Usage
 
 @python-tickit@ mirrors the Perl "Tickit":https://metacpan.org/module/Tickit APIs where possible. The following APIs are mirrored:
 
-* "Tickit::Pen":https://metacpan.org/module/Tickit::Pen, as a MutableMapping subclass;
-* "Tickit::Rect":https://metacpan.org/module/Tickit::Rect, as a Container subclass;
-* "Tickit::RectSet":http://metacpan.org/module/Tickit::Rect, as a MutableSet subclass;
-* "Tickit::StringPos":https://metacpan.org/module/Tickit::StringPos; and
-* "Tickit::Term":https://metacpan.org/module/Tickit::Term.
+* "@Tickit::Pen@":https://metacpan.org/module/Tickit::Pen, @Pen::Mutable@ (as @MutablePen@), and @Pen::Immutable@ (as @ImmutablePen@) as implementations of MutableMapping and Mapping ABCs;
+* "@Tickit::Rect@":https://metacpan.org/module/Tickit::Rect, as an implementation of the @Container@ ABC;
+* "@Tickit::RectSet@":http://metacpan.org/module/Tickit::RectSet, as an implementation of the @Sized@ and @Iterable@ ABCs;
+* "@Tickit::StringPos@":https://metacpan.org/module/Tickit::StringPos; and
+* "@Tickit::Term@":https://metacpan.org/module/Tickit::Term.
 
 Please refer to the relevant "@collections.abc@":http://docs.python.org/3/library/collections.abc.html documentation for Python ABC subclasses.
 
