@@ -36,6 +36,16 @@ class ImmutablePen(Mapping):
             func = _set[tickit.pen_attrtype(attr)]
             func(self._pen, attr, v)
 
+    def _update(self):
+        for attribute in PenAttribute:
+            attr = self.getattr(attribute)
+            name = tickit.pen_attrname(attribute)
+
+            if attr == -1 or attr is False:
+                continue
+            else:
+                self._attrs[name] = attr
+
     @classmethod
     def new_from_attrs(cls, **kwargs):
         return cls(**kwargs)
